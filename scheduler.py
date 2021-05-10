@@ -1,52 +1,121 @@
-import this
-
+import matplotlib.pyplot as plt
 import numpy as np
+import queue
 
 
-class Task:
-    def __init__(self, task_id, arrival_time, service_time):
-        self.task_id = task_id
+class Task(object):
+    def __init__(self, arrival_time, service_time):
         self.arrival_time = arrival_time
         self.service_time = service_time
 
+        self.retention_time = 0
+        self.start_time = 0
+        self.end_time = 0
 
-class Scheduler:
-    def __init__(self, total_time, tasks_per_hour, service_rate):
-        self.task_count = tasks_per_hour * total_time
-        self.arrival_rate = 0.05 * tasks_per_hour
-        self.tasks_per_hour = tasks_per_hour
-        self.total_time = total_time * 3600
+    def start(self, current_time):
+        self.start_time = current_time
+        self.end_time = current_time + self.service_time
+        self.retention_time = current_time - self.arrival_time + self.service_time
+
+
+class System(object):
+    def __init__(self, tasks, total_time):
+        self.tasks = tasks
+        self.total_time = total_time
+
+        self.task_count = 0
+        self.wait_time = 0
+        self.is_busy = 0
+
+    def run(self):
+        current_task = self.tasks.get()
+
+        for i in range(self.total_time):
+            if self.is_busy and i >= current_task.end_time:
+                if not self.tasks.empty():
+                    current_task = self.tasks.get()
+                self.is_busy = 0
+
+            if i < current_task.arrival_time:
+                if not self.is_busy:
+                    self.wait_time += 1
+                continue
+
+            if self.is_busy:
+                continue
+
+            if current_task.start_time != 0:
+                self.wait_time += 1
+                continue
+
+            current_task.start(i)
+            print("Arrival: " + str(current_task.arrival_time))
+            print("Start: " + str(current_task.start_time))
+            print("Retention: " + str(current_task.retention_time))
+            self.task_count += 1
+            self.is_busy = 1
+
+    def analyze(self):
+        print("Task count: " + str(self.task_count))
+        print("Wait time (in seconds): " + str(self.wait_time))
+
+
+class Simulator(object):
+    def __init__(self, total_time, arrival_rate, service_rate):
+        self.total_time = total_time
+        self.total_tasks = total_time * arrival_rate
+        self.arrival_rate = arrival_rate
         self.service_rate = service_rate
-        self.current_time = 0
-        self.tasks = self.generate_tasks()
 
-    def generate_tasks(self):
-        task_id = 1
+        self.tasks = queue.Queue()
+        self.system = System([], self.total_time * 60 * 60)
 
-        tasks = {}
+        self.arrival_times = []
+        self.service_times = []
 
-        for i in range(self.task_count):
-            arrival_time = self.calculate_arrival_time(self.arrival_rate)
-            service_time = self.calculate_service_time(self.service_rate)
+    def prepare(self):
+        for i in range(self.total_tasks):
+            self.arrival_times.append(np.random.exponential(1 / self.arrival_rate) * 60 * 60 * self.total_time)
+            self.service_times.append(np.random.exponential(1 / self.service_rate) * 60 * 60)
 
-            tasks[i] = Task(task_id, arrival_time, service_time)
+        self.arrival_times.sort()
 
-            task_id += 1
+        for i in range(self.total_tasks):
+            arrival_time = self.arrival_times[i]
+            service_time = self.service_times[i]
 
-        return tasks
+            self.tasks.put(Task(arrival_time, service_time))
 
-    @staticmethod
-    def calculate_service_time(service_rate):
-        return np.random.exponential(service_rate)
+        self.system.tasks = self.tasks
 
-    @staticmethod
-    def calculate_arrival_time(arrival_rate):
-        return np.random.exponential(arrival_rate)
+    def run(self):
+        self.system.run()
+
+    def analyze(self):
+        self.system.analyze()
+
+        print("Total time (in seconds): " + str(self.total_time * 60 * 60))
 
 
 def main():
-    # 10 hours, 30 tasks per hour, 0.01 hours per task
-    scheduler = Scheduler(10, 30, 0.01)
+    # Quantity of incoming tasks per hour
+    arrival_rate = 5
+
+    # Quantity of tasks per hour the system can handle
+    service_rate = 5
+
+    # Total simulation time in hours
+    total_time = 5
+
+    # Create and prepare simulation
+    simulator = Simulator(total_time, arrival_rate, service_rate)
+    simulator.prepare()
+
+    # Run simulation
+    simulator.run()
+
+    # Analyze simulation data
+    simulator.analyze()
 
 
 if __name__ == "__main__":
