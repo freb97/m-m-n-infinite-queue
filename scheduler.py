@@ -23,8 +23,9 @@ class System(object):
         self.tasks = tasks
         self.total_time = total_time
 
+        self.unfinished_tasks = 0
         self.task_count = 0
-        self.wait_time = 0
+        self.idle_time = 0
         self.is_busy = 0
 
     def run(self):
@@ -38,26 +39,36 @@ class System(object):
 
             if i < current_task.arrival_time:
                 if not self.is_busy:
-                    self.wait_time += 1
+                    self.idle_time += 1
                 continue
 
             if self.is_busy:
                 continue
 
             if current_task.start_time != 0:
-                self.wait_time += 1
+                self.idle_time += 1
                 continue
 
             current_task.start(i)
-            print("Arrival: " + str(current_task.arrival_time))
-            print("Start: " + str(current_task.start_time))
-            print("Retention: " + str(current_task.retention_time))
+            # print("Arrival: " + str(current_task.arrival_time))
+            # print("Start: " + str(current_task.start_time))
+            # print("Retention: " + str(current_task.retention_time))
             self.task_count += 1
             self.is_busy = 1
 
+        if current_task.end_time > self.total_time:
+            self.unfinished_tasks += 1
+
+        if not self.tasks.empty():
+            self.unfinished_tasks += len(self.tasks.queue)
+
     def analyze(self):
+        if not self.tasks.empty():
+            print(str(self.unfinished_tasks) + " task(s) were not finished because the total time was reached.")
+
+        print("Total time (in seconds): " + str(self.total_time))
         print("Task count: " + str(self.task_count))
-        print("Wait time (in seconds): " + str(self.wait_time))
+        print("Wait time (in seconds): " + str(self.idle_time))
 
 
 class Simulator(object):
@@ -93,8 +104,6 @@ class Simulator(object):
 
     def analyze(self):
         self.system.analyze()
-
-        print("Total time (in seconds): " + str(self.total_time * 60 * 60))
 
 
 def main():
