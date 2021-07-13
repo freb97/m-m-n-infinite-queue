@@ -1,2 +1,7 @@
+# IDE specific files
 /.idea
+/.vs
+/.vscode
+
+# Mac files
 /.DS_Store
