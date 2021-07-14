@@ -27,6 +27,7 @@ class Task(object):
         service_time : int
             The time in seconds it takes to solve this particular task.
         """
+
         self.arrival_time = arrival_time
         self.service_time = service_time
 

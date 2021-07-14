@@ -1,6 +1,6 @@
-# M/M/1 Queue
+# M/M/n/infinite Queue
 
-An implementation of a simple [M/M/1 queue](https://en.wikipedia.org/wiki/M/M/1_queue) in python.
+An implementation of an M/M/n/infinite queue.
 
 ## Getting Started
 
@@ -15,9 +15,18 @@ Python packages:
 ### Installation
 
 * Download and install python 3 and pip/conda
-* Install packages (see dependencies)
+* Install conda environment
 * Start jupyter server
 * Run the notebook file
+
+## Usage
+
+The queue simulator needs 4 arguments, they can be changed in the main function of `simulator.py`:
+
+- Arrival rate: Quantity of incoming tasks per hour
+- Service rate: Quantity of tasks per hour a server can handle
+- Total time: Total simulation time in hours
+- Server count: Total number of servers in the simulation
 
 ## Authors
 
@@ -26,4 +35,4 @@ E-Mail: <frederik@bussmann.io>
 
 ## Version History
 
-* 0.1
+* 0.2
