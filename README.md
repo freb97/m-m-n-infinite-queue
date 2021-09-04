@@ -1,6 +1,6 @@
 # M/M/n/infinite Queue
 
-An implementation of an M/M/n/infinite queue.
+A simulation of an M/M/n/infinite queue.
 
 ## Getting Started
 
